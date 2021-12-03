@@ -26,8 +26,7 @@ class Game:
         while game_running:
             clock.tick(25)
             for event in pygame.event.get():
-                if self.get_game_over():
-                    self.show_game_over_screen(screen)
+                if self.get_game_over() is True:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
                             player = Player()
@@ -51,6 +50,10 @@ class Game:
                             if self.player_allowed_to_shoot():
                                 self.projectiles.append(Projectile(player.get_pos()))
                                 self.player_cooldown = 15
+                        if event.key == pygame.K_j:
+                            self.lives = 0
+                        if event.key == pygame.K_k:
+                            self.score += 1
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = False
@@ -74,15 +77,6 @@ class Game:
                     pygame.display.flip()
         pygame.quit()
 
-    def get_targets(self):
-        return self.targets
-
-    def get_projectiles(self):
-        return self.projectiles
-
-    def get_game_over(self):
-        return self.game_over
-
     def update_everything(self, surface):
         self.check_targets()
         self.create_targets()
@@ -90,19 +84,9 @@ class Game:
         self.draw_targets(surface)
 
     def create_targets(self):
-        if len(self.targets) < 6:
-            if random.random() > 0.9:
+        if len(self.targets) < 20:
+            if random.random() > 0.95:
                 self.targets.append(Target(random.randint(25, 775), -25, random.random()))
-
-    def draw_projectiles(self, surface):
-        for projectile in self.projectiles:
-            projectile.update_pos()
-            projectile.draw_projectile(surface)
-
-    def draw_targets(self, surface):
-        for target in self.targets:
-            target.update_pos()
-            target.draw_target(surface)
 
     def check_targets(self):
         for target in self.targets:
@@ -115,11 +99,15 @@ class Game:
                     self.projectiles.remove(projectile)
                     self.score += 1
 
-    def get_score(self):
-        return self.score
+    def draw_projectiles(self, surface):
+        for projectile in self.projectiles:
+            projectile.update_pos()
+            projectile.draw_projectile(surface)
 
-    def get_lives(self):
-        return self.lives
+    def draw_targets(self, surface):
+        for target in self.targets:
+            target.update_pos()
+            target.draw_target(surface)
 
     def draw_text(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 20)
@@ -135,7 +123,7 @@ class Game:
         play_again = font.render("Press Enter to play again", True, (255, 255, 255))
         surface.blit(over_text, (200, 150))
         surface.blit(score, (200, 300))
-        surface.blit(play_again, (200, 450))
+        surface.blit(play_again, (200, 600))
 
     def get_player_cooldown(self):
         return self.player_cooldown
@@ -145,3 +133,18 @@ class Game:
             return True
         else:
             return False
+
+    def get_targets(self):
+        return self.targets
+
+    def get_projectiles(self):
+        return self.projectiles
+
+    def get_game_over(self):
+        return self.game_over
+
+    def get_score(self):
+        return self.score
+
+    def get_lives(self):
+        return self.lives
