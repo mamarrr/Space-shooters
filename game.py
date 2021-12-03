@@ -26,16 +26,27 @@ class Game:
         while game_running:
             clock.tick(25)
             for event in pygame.event.get():
+                if self.get_game_over():
+                    self.show_game_over_screen(screen)
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            player = Player()
+                            self.lives = 5
+                            self.score = 0
+                            self.player_cooldown = 0
+                            self.targets = []
+                            self.projectiles = []
+                            self.game_over = False
+                    if event.type == pygame.QUIT:
+                        game_running = False
                 if event.type == pygame.QUIT:
                     game_running = False
-                if self.game_over is False:
+                if self.get_game_over() is False:
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = True
-                            player.update_pos("right")
                         if event.key == pygame.K_LEFT:
                             player_moving_left = True
-                            player.update_pos("left")
                         if event.key == pygame.K_SPACE:
                             if self.player_allowed_to_shoot():
                                 self.projectiles.append(Projectile(player.get_pos()))
@@ -52,11 +63,8 @@ class Game:
                             player.update_pos("right")
                         if player_moving_left:
                             player.update_pos("left")
-                    self.check_targets()
-                    self.create_targets()
                     screen.fill("black")
-                    self.draw_projectiles(screen)
-                    self.draw_targets(screen)
+                    self.update_everything(screen)
                     player.draw_player(screen)
                     if self.get_lives() <= 0:
                         self.game_over = True
@@ -71,6 +79,15 @@ class Game:
 
     def get_projectiles(self):
         return self.projectiles
+
+    def get_game_over(self):
+        return self.game_over
+
+    def update_everything(self, surface):
+        self.check_targets()
+        self.create_targets()
+        self.draw_projectiles(surface)
+        self.draw_targets(surface)
 
     def create_targets(self):
         if len(self.targets) < 6:
@@ -112,11 +129,13 @@ class Game:
         surface.blit(lives, (700, 770))
 
     def show_game_over_screen(self, surface):
-        font = pygame.font.Font('freesansbold.ttf', 60)
+        font = pygame.font.Font('freesansbold.ttf', 30)
         over_text = font.render("Game Over!", True, (255, 255, 255))
         score = font.render("Score: " + str(self.get_score()), True, (255, 255, 255))
+        play_again = font.render("Press Enter to play again", True, (255, 255, 255))
         surface.blit(over_text, (200, 150))
-        surface.blit(score, (200, 400))
+        surface.blit(score, (200, 300))
+        surface.blit(play_again, (200, 450))
 
     def get_player_cooldown(self):
         return self.player_cooldown
