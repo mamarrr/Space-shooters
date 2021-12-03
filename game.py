@@ -73,10 +73,8 @@ class Game:
                             player.update_pos("right")
                         if player_moving_left:
                             player.update_pos("left")
-                    screen.fill("black")
-                    screen.blit(self.images["background"], (0, 0))
                     self.update_everything(screen)
-                    screen.blit(self.images["spaceship"], (player.get_pos() - 28, 700))
+                    screen.blit(self.images["spaceship"], (player.get_pos() - 36.5, 700))
                     if self.get_lives() <= 0:
                         self.game_over = True
                         self.show_game_over_screen(screen)
@@ -86,6 +84,8 @@ class Game:
         pygame.quit()
 
     def update_everything(self, surface):
+        surface.fill("black")
+        surface.blit(self.images["background"], (0, 0))
         self.check_targets()
         self.create_targets()
         self.draw_projectiles(surface)
@@ -110,12 +110,12 @@ class Game:
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
             projectile.update_pos()
-            surface.blit(self.images["projectile"], projectile.get_pos())
+            surface.blit(self.images["projectile"], (projectile.get_pos()[0] - 10, projectile.get_pos()[1] - 10))
 
     def draw_targets(self, surface):
         for target in self.targets:
             target.update_pos()
-            surface.blit(self.images["target"], target.get_pos())
+            surface.blit(self.images["target"], (target.get_pos()[0] - 50, target.get_pos()[1] - 50))
 
     def draw_text(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 20)
