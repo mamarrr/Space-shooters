@@ -73,9 +73,9 @@ class Game:
         return self.projectiles
 
     def create_targets(self):
-        if len(self.targets) < 5:
+        if len(self.targets) < 6:
             if random.random() > 0.9:
-                self.targets.append(Target(random.randint(25, 775), -25))
+                self.targets.append(Target(random.randint(25, 775), -25, random.random()))
 
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
