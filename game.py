@@ -74,6 +74,7 @@ class Game:
                         if player_moving_left:
                             player.update_pos("left")
                     screen.fill("black")
+                    screen.blit(self.images["background"], (0, 0))
                     self.update_everything(screen)
                     screen.blit(self.images["spaceship"], (player.get_pos() - 28, 700))
                     if self.get_lives() <= 0:
@@ -101,7 +102,7 @@ class Game:
                 self.targets.remove(target)
                 self.lives -= 1
             for projectile in self.projectiles:
-                if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 50) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 50):
+                if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 40) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 50):
                     self.targets.remove(target)
                     self.projectiles.remove(projectile)
                     self.score += 1
@@ -156,8 +157,11 @@ class Game:
                 image = pygame.transform.scale(image, (20, 20))
             if file_name.split(".")[0] == "target":
                 image = pygame.transform.scale(image, (100, 100))
-            image.convert_alpha()
-            image.set_colorkey((0, 0, 0))
+            if file_name.split(".")[0] == "background":
+                image = pygame.transform.scale(image, (800, 800))
+            if file_name.split(".")[0] != "background":
+                image.convert_alpha()
+                image.set_colorkey((0, 0, 0))
             self.images[file_name.split(".")[0]] = image
 
     def get_targets(self):
