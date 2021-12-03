@@ -130,7 +130,7 @@ class Game:
         font = pygame.font.Font('freesansbold.ttf', 30)
         over_text = font.render("Game Over!", True, (255, 255, 255))
         score = font.render("Score: " + str(self.get_score()), True, (255, 255, 255))
-        highscore = font.render("Highscores: " + str(self.highscores.get_highest()), True, (255, 255, 255))
+        highscore = font.render("Highscore: " + str(self.highscores.get_highest()), True, (255, 255, 255))
         play_again = font.render("Press Enter to play again", True, (255, 255, 255))
         surface.blit(over_text, (200, 150))
         surface.blit(score, (200, 300))

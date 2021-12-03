@@ -21,9 +21,9 @@ class Target:
             self.move_right = False
             self.move_left = True
         if self.move_left:
-            self.pos[0] -= 12
+            self.pos[0] -= 24
         if self.move_right:
-            self.pos[0] += 12
+            self.pos[0] += 24
 
     def get_pos(self):
         return self.pos
