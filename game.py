@@ -3,6 +3,7 @@ import random
 from player import Player
 from projectile import Projectile
 from target import Target
+from highscores import Highscores
 
 
 class Game:
@@ -14,6 +15,7 @@ class Game:
         self.lives = 5
         self.player_cooldown = 0
         self.game_over = False
+        self.highscores = Highscores()
 
     def run(self):
         pygame.init()
@@ -28,6 +30,9 @@ class Game:
             for event in pygame.event.get():
                 if self.get_game_over() is True:
                     if event.type == pygame.KEYDOWN:
+                        self.highscores.current_score = self.score
+                        self.highscores.check_new_highest()
+                        self.highscores.add_current_data_to_file()
                         if event.key == pygame.K_RETURN:
                             player = Player()
                             self.lives = 5
@@ -37,6 +42,9 @@ class Game:
                             self.projectiles = []
                             self.game_over = False
                     if event.type == pygame.QUIT:
+                        self.highscores.current_score = self.score
+                        self.highscores.check_new_highest()
+                        self.highscores.add_current_data_to_file()
                         game_running = False
                 if event.type == pygame.QUIT:
                     game_running = False
@@ -50,10 +58,6 @@ class Game:
                             if self.player_allowed_to_shoot():
                                 self.projectiles.append(Projectile(player.get_pos()))
                                 self.player_cooldown = 15
-                        if event.key == pygame.K_j:
-                            self.lives = 0
-                        if event.key == pygame.K_k:
-                            self.score += 1
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = False
@@ -112,17 +116,21 @@ class Game:
     def draw_text(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 20)
         score = font.render("Score: " + str(self.get_score()), True, (255, 255, 255))
+        highscore = font.render("Highscores: " + str(self.highscores.get_highest()), True, (255, 255, 255))
         lives = font.render("Lives: " + str(self.get_lives()), True, (255, 255, 255))
         surface.blit(score, (30, 770))
+        surface.blit(highscore, (200, 770))
         surface.blit(lives, (700, 770))
 
     def show_game_over_screen(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 30)
         over_text = font.render("Game Over!", True, (255, 255, 255))
         score = font.render("Score: " + str(self.get_score()), True, (255, 255, 255))
+        highscore = font.render("Highscores: " + str(self.highscores.get_highest()), True, (255, 255, 255))
         play_again = font.render("Press Enter to play again", True, (255, 255, 255))
         surface.blit(over_text, (200, 150))
         surface.blit(score, (200, 300))
+        surface.blit(highscore, (200, 450))
         surface.blit(play_again, (200, 600))
 
     def get_player_cooldown(self):
