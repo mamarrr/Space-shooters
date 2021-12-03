@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 from player import Player
 from projectile import Projectile
 from target import Target
@@ -16,12 +17,14 @@ class Game:
         self.player_cooldown = 0
         self.game_over = False
         self.highscores = Highscores()
+        self.images = {}
 
     def run(self):
         pygame.init()
         clock = pygame.time.Clock()
         pygame.time.set_timer(pygame.USEREVENT, 50)
         screen = pygame.display.set_mode(self.game_size)
+        self.load_images()
         game_running = True
         player = Player()
         player_moving_right, player_moving_left = False, False
@@ -72,7 +75,7 @@ class Game:
                             player.update_pos("left")
                     screen.fill("black")
                     self.update_everything(screen)
-                    player.draw_player(screen)
+                    screen.blit(self.images["spaceship"], (player.get_pos() - 28, 700))
                     if self.get_lives() <= 0:
                         self.game_over = True
                         self.show_game_over_screen(screen)
@@ -98,7 +101,7 @@ class Game:
                 self.targets.remove(target)
                 self.lives -= 1
             for projectile in self.projectiles:
-                if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 20) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 20):
+                if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 50) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 50):
                     self.targets.remove(target)
                     self.projectiles.remove(projectile)
                     self.score += 1
@@ -106,12 +109,12 @@ class Game:
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
             projectile.update_pos()
-            projectile.draw_projectile(surface)
+            surface.blit(self.images["projectile"], projectile.get_pos())
 
     def draw_targets(self, surface):
         for target in self.targets:
             target.update_pos()
-            target.draw_target(surface)
+            surface.blit(self.images["target"], target.get_pos())
 
     def draw_text(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 20)
@@ -141,6 +144,21 @@ class Game:
             return True
         else:
             return False
+
+    def load_images(self):
+        for file_name in os.listdir("images"):
+            if not file_name.endswith(".png"):
+                continue
+            image = pygame.image.load(r"images/" + file_name)
+            if file_name.split(".")[0] == "spaceship":
+                image = pygame.transform.scale(image, (75, 75))
+            if file_name.split(".")[0] == "projectile":
+                image = pygame.transform.scale(image, (20, 20))
+            if file_name.split(".")[0] == "target":
+                image = pygame.transform.scale(image, (100, 100))
+            image.convert_alpha()
+            image.set_colorkey((0, 0, 0))
+            self.images[file_name.split(".")[0]] = image
 
     def get_targets(self):
         return self.targets

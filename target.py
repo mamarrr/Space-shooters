@@ -11,9 +11,6 @@ class Target:
             self.move_right = True
             self.move_left = False
 
-    def draw_target(self, surface):
-        pygame.draw.circle(surface, (0, 0, 255), self.get_pos(), 20)
-
     def update_pos(self):
         if self.pos[0] <= 30:
             self.pos[1] += 55
