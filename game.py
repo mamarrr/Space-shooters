@@ -68,12 +68,8 @@ class Game:
                         if event.key == pygame.K_SPACE:
                             if self.player_allowed_to_shoot():
                                 self.projectiles.append(Projectile(player.get_pos()))
-                                if "cooldown_reduction" in player.powerups:
-                                    for powerup in player.powerups:
-                                        if powerup.type == "cooldown_reduction":
-                                            self.player_cooldown -= 0.1
-                                else:
-                                    self.player_cooldown = 15
+                                self.player_cooldown = self.calculate_player_cooldown(player)
+                                print(self.player_cooldown)
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = False
@@ -114,7 +110,6 @@ class Game:
             self.difficulty = "Hard"
 
     def create_targets(self, difficulty):
-        print(difficulty)
         if difficulty == "Easy":
             if len(self.targets) < 25:
                 if random.random() > 0.95:
@@ -135,8 +130,8 @@ class Game:
                 self.lives -= 1
             for projectile in self.projectiles:
                 if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 40) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 50):
-                    if random.random() > 0.96:
-                        if random.random() >= 0.4:
+                    if random.random() > 0.9:
+                        if random.random() >= 0.5:
                             self.drops.append(Drop("heart", target.get_pos()))
                         else:
                             self.drops.append(Drop("cooldown_reduction", target.get_pos()))
@@ -152,9 +147,15 @@ class Game:
                 if drop.type == "heart":
                     self.lives += 1
                 if drop.type == "cooldown_reduction":
-                    if "cooldown_reduction" not in player.powerups:
-                        player.powerups.append("cooldown_reduction")
+                    player.powerups.append("cooldown_reduction")
                 self.drops.remove(drop)
+
+    def calculate_player_cooldown(self, player):
+        cooldown = 15
+        for powerup in player.powerups:
+            if powerup == "cooldown_reduction":
+                cooldown -= 0.5
+        return cooldown
 
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
@@ -192,9 +193,6 @@ class Game:
         surface.blit(score, (200, 300))
         surface.blit(highscore, (200, 450))
         surface.blit(play_again, (200, 600))
-
-    def get_player_cooldown(self):
-        return self.player_cooldown
 
     def player_allowed_to_shoot(self):
         if self.player_cooldown <= 0:
