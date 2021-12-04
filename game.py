@@ -27,6 +27,12 @@ class Game:
         clock = pygame.time.Clock()
         pygame.time.set_timer(pygame.USEREVENT, 50)
         screen = pygame.display.set_mode(self.game_size)
+        pygame.mixer.init()
+        shooting_sound = pygame.mixer.Sound('Sounds/Shooting_sound.wav')
+        shooting_sound.set_volume(3)
+        game_over_sound = pygame.mixer.Sound('Sounds/Game_over_sound.wav')
+        game_over_sound.set_volume(0.3)
+        play_game_over_sound = True
         self.load_images()
         game_running = True
         player = Player()
@@ -35,6 +41,9 @@ class Game:
             clock.tick(25)
             for event in pygame.event.get():
                 if self.get_game_over() is True:
+                    if play_game_over_sound:
+                        play_game_over_sound = False
+                        game_over_sound.play()
                     if event.type == pygame.KEYDOWN:
                         self.highscores.current_score = self.score
                         self.highscores.check_new_highest()
@@ -49,6 +58,7 @@ class Game:
                             self.drops = []
                             self.difficulty = "Easy"
                             self.game_over = False
+                            play_game_over_sound = True
                     if event.type == pygame.QUIT:
                         self.highscores.current_score = self.score
                         self.highscores.check_new_highest()
@@ -67,6 +77,7 @@ class Game:
                             player_moving_left = True
                         if event.key == pygame.K_SPACE:
                             if self.player_allowed_to_shoot():
+                                shooting_sound.play()
                                 self.projectiles.append(Projectile(player.get_pos()))
                                 self.player_cooldown = self.calculate_player_cooldown(player)
                                 print(self.player_cooldown)
@@ -140,15 +151,19 @@ class Game:
                     self.score += 1
 
     def check_drops(self, player):
+        drops_sound = pygame.mixer.Sound('Sounds/Get_drop_sound.wav')
+        drops_sound.set_volume(0.1)
         for drop in self.drops:
             if drop.get_pos()[1] >= 800:
                 self.drops.remove(drop)
             if (abs(drop.get_pos()[0] - player.get_pos()) <= 35) and (abs(drop.get_pos()[1] - 700) <= 35):
+                drops_sound.play()
                 if drop.type == "heart":
                     self.lives += 1
                 if drop.type == "cooldown_reduction":
                     player.powerups.append("cooldown_reduction")
                 self.drops.remove(drop)
+
 
     def calculate_player_cooldown(self, player):
         cooldown = 15
