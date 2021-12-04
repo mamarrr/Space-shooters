@@ -15,7 +15,7 @@ class Highscores:
             self.highest = int(self.current_score)
 
     def check_highest(self):
-        if self.highest == None:
+        if self.highest is None:
             self.highest = 0
         for num in self.read_data():
             if num:

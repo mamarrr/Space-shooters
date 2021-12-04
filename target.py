@@ -1,6 +1,3 @@
-import pygame
-
-
 class Target:
     def __init__(self, x, y, initial_movement):
         self.pos = [x, y]

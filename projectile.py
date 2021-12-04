@@ -1,6 +1,3 @@
-import pygame
-
-
 class Projectile:
     def __init__(self, playerpos):
         self.pos = [playerpos, 700]
