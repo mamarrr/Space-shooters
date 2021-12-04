@@ -5,6 +5,7 @@ class Player:
     def __init__(self):
         self.pos = 400
         self.cooldown = 0
+        self.powerups = []
 
     def get_pos(self):
         return self.pos

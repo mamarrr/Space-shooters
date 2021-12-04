@@ -5,6 +5,7 @@ from player import Player
 from projectile import Projectile
 from target import Target
 from highscores import Highscores
+from drops import Drop
 
 
 class Game:
@@ -12,12 +13,14 @@ class Game:
         self.game_size = game_size
         self.targets = []
         self.projectiles = []
+        self.drops = []
         self.score = 0
         self.lives = 5
         self.player_cooldown = 0
         self.game_over = False
         self.highscores = Highscores()
         self.images = {}
+        self.difficulty = "Easy"
 
     def run(self):
         pygame.init()
@@ -43,6 +46,8 @@ class Game:
                             self.player_cooldown = 0
                             self.targets = []
                             self.projectiles = []
+                            self.drops = []
+                            self.difficulty = "Easy"
                             self.game_over = False
                     if event.type == pygame.QUIT:
                         self.highscores.current_score = self.score
@@ -50,6 +55,9 @@ class Game:
                         self.highscores.add_current_data_to_file()
                         game_running = False
                 if event.type == pygame.QUIT:
+                    self.highscores.current_score = self.score
+                    self.highscores.check_new_highest()
+                    self.highscores.add_current_data_to_file()
                     game_running = False
                 if self.get_game_over() is False:
                     if event.type == pygame.KEYDOWN:
@@ -60,7 +68,12 @@ class Game:
                         if event.key == pygame.K_SPACE:
                             if self.player_allowed_to_shoot():
                                 self.projectiles.append(Projectile(player.get_pos()))
-                                self.player_cooldown = 15
+                                if "cooldown_reduction" in player.powerups:
+                                    for powerup in player.powerups:
+                                        if powerup.type == "cooldown_reduction":
+                                            self.player_cooldown -= 0.1
+                                else:
+                                    self.player_cooldown = 15
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = False
@@ -73,7 +86,7 @@ class Game:
                             player.update_pos("right")
                         if player_moving_left:
                             player.update_pos("left")
-                    self.update_everything(screen)
+                    self.update_everything(screen, player)
                     screen.blit(self.images["spaceship"], (player.get_pos() - 36.5, 700))
                     if self.get_lives() <= 0:
                         self.game_over = True
@@ -83,18 +96,37 @@ class Game:
                     pygame.display.flip()
         pygame.quit()
 
-    def update_everything(self, surface):
+    def update_everything(self, surface, player):
+        self.check_difficulty()
         surface.fill("black")
         surface.blit(self.images["background"], (0, 0))
         self.check_targets()
-        self.create_targets()
+        self.check_drops(player)
+        self.create_targets(self.get_difficulty())
         self.draw_projectiles(surface)
         self.draw_targets(surface)
+        self.draw_drops(surface)
 
-    def create_targets(self):
-        if len(self.targets) < 20:
-            if random.random() > 0.95:
-                self.targets.append(Target(random.randint(25, 775), -25, random.random()))
+    def check_difficulty(self):
+        if self.score > 100:
+            self.difficulty = "Normal"
+        if self.score > 250:
+            self.difficulty = "Hard"
+
+    def create_targets(self, difficulty):
+        print(difficulty)
+        if difficulty == "Easy":
+            if len(self.targets) < 25:
+                if random.random() > 0.95:
+                    self.targets.append(Target(random.randint(25, 775), -25, random.random()))
+        if difficulty == "Normal":
+            if len(self.targets) < 27:
+                if random.random() > 0.9:
+                    self.targets.append(Target(random.randint(25, 775), -25, random.random()))
+        if difficulty == "Hard":
+            if len(self.targets) < 30:
+                if random.random() > 0.8:
+                    self.targets.append(Target(random.randint(25, 775), -25, random.random()))
 
     def check_targets(self):
         for target in self.targets:
@@ -103,9 +135,26 @@ class Game:
                 self.lives -= 1
             for projectile in self.projectiles:
                 if (abs(projectile.get_pos()[0] - target.get_pos()[0]) <= 40) and (abs(projectile.get_pos()[1] - target.get_pos()[1]) <= 50):
+                    if random.random() > 0.96:
+                        if random.random() >= 0.4:
+                            self.drops.append(Drop("heart", target.get_pos()))
+                        else:
+                            self.drops.append(Drop("cooldown_reduction", target.get_pos()))
                     self.targets.remove(target)
                     self.projectiles.remove(projectile)
                     self.score += 1
+
+    def check_drops(self, player):
+        for drop in self.drops:
+            if drop.get_pos()[1] >= 800:
+                self.drops.remove(drop)
+            if (abs(drop.get_pos()[0] - player.get_pos()) <= 35) and (abs(drop.get_pos()[1] - 700) <= 35):
+                if drop.type == "heart":
+                    self.lives += 1
+                if drop.type == "cooldown_reduction":
+                    if "cooldown_reduction" not in player.powerups:
+                        player.powerups.append("cooldown_reduction")
+                self.drops.remove(drop)
 
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
@@ -120,11 +169,18 @@ class Game:
     def draw_text(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 20)
         score = font.render("Score: " + str(self.get_score()), True, (255, 255, 255))
-        highscore = font.render("Highscores: " + str(self.highscores.get_highest()), True, (255, 255, 255))
+        highscore = font.render("Highscore: " + str(self.highscores.get_highest()), True, (255, 255, 255))
+        difficulty = font.render("Difficulty: " + str(self.get_difficulty()), True, (255, 255, 255))
         lives = font.render("Lives: " + str(self.get_lives()), True, (255, 255, 255))
-        surface.blit(score, (30, 770))
-        surface.blit(highscore, (200, 770))
+        surface.blit(score, (30, 740))
+        surface.blit(highscore, (30, 770))
+        surface.blit(difficulty, (620, 20))
         surface.blit(lives, (700, 770))
+
+    def draw_drops(self, surface):
+        for drop in self.drops:
+            drop.update_pos()
+            surface.blit(self.images[drop.type], drop.get_pos())
 
     def show_game_over_screen(self, surface):
         font = pygame.font.Font('freesansbold.ttf', 30)
@@ -159,6 +215,8 @@ class Game:
                 image = pygame.transform.scale(image, (100, 100))
             if file_name.split(".")[0] == "background":
                 image = pygame.transform.scale(image, (800, 800))
+            if file_name.split(".")[0] == "heart" or file_name.split(".")[0] == "cooldown_reduction":
+                image = pygame.transform.scale(image, (20, 20))
             if file_name.split(".")[0] != "background":
                 image.convert_alpha()
                 image.set_colorkey((0, 0, 0))
@@ -178,3 +236,9 @@ class Game:
 
     def get_lives(self):
         return self.lives
+
+    def get_difficulty(self):
+        return self.difficulty
+
+    def get_player_cooldown(self):
+        return self.player_cooldown
