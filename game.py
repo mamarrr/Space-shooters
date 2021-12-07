@@ -101,7 +101,6 @@ class Game:
                                 shooting_sound.play()
                                 self.projectiles.append(Projectile(player.get_pos()))
                                 self.player_cooldown = self.calculate_player_cooldown(player)
-                                print(self.player_cooldown)
                     if event.type == pygame.KEYUP:
                         if event.key == pygame.K_RIGHT:
                             player_moving_right = False
