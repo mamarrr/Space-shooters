@@ -190,7 +190,10 @@ class Game:
         for powerup in player.powerups:
             if powerup == "cooldown_reduction":
                 cooldown -= 0.5
-        return cooldown
+        if cooldown < 7:
+            return 7
+        else:
+            return cooldown
 
     def draw_projectiles(self, surface):
         for projectile in self.projectiles:
