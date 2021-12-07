@@ -29,14 +29,35 @@ class Game:
         screen = pygame.display.set_mode(self.game_size)
         pygame.mixer.init()
         shooting_sound = pygame.mixer.Sound('Sounds/Shooting_sound.wav')
-        shooting_sound.set_volume(3)
+        shooting_sound.set_volume(4)
         game_over_sound = pygame.mixer.Sound('Sounds/Game_over_sound.wav')
         game_over_sound.set_volume(0.3)
+        main_music = pygame.mixer.Sound('Sounds/main_music.wav')
+        main_music.set_volume(0.05)
         play_game_over_sound = True
         self.load_images()
         game_running = True
         player = Player()
         player_moving_right, player_moving_left = False, False
+        black = (0, 0, 0)
+        main_screen = True
+        while main_screen is True:
+            main_music.play(loops=-1)
+            screen.fill(black)
+            font = pygame.font.Font("freesansbold.ttf", 30)
+            welcome = font.render("Welcome to Space Shooters!", True, (255, 255, 255))
+            begin = font.render("Press any key to continue", True, (255, 255, 255))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_running = False
+                    main_screen = False
+                if event.type == pygame.KEYDOWN:
+                    main_screen = False
+                    main_music.stop()
+            screen.blit(self.images["background"], (0, 0))
+            screen.blit(welcome, (200, 150))
+            screen.blit(begin, (200, 550))
+            pygame.display.flip()
         while game_running:
             clock.tick(25)
             for event in pygame.event.get():
@@ -163,7 +184,6 @@ class Game:
                 if drop.type == "cooldown_reduction":
                     player.powerups.append("cooldown_reduction")
                 self.drops.remove(drop)
-
 
     def calculate_player_cooldown(self, player):
         cooldown = 15
