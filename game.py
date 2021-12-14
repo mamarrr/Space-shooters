@@ -166,7 +166,8 @@ class Game:
                             self.drops.append(Drop("heart", target.get_pos()))
                         else:
                             self.drops.append(Drop("cooldown_reduction", target.get_pos()))
-                    self.targets.remove(target)
+                    if target in self.targets:
+                        self.targets.remove(target)
                     self.projectiles.remove(projectile)
                     self.score += 1
 
@@ -188,7 +189,7 @@ class Game:
         cooldown = 15
         for powerup in player.powerups:
             if powerup == "cooldown_reduction":
-                cooldown -= 0.5
+                cooldown -= 0.2
         if cooldown < 7:
             return 7
         else:
